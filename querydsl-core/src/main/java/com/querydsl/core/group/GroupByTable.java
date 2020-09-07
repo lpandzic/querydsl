@@ -42,7 +42,8 @@ public class GroupByTable<R, C, V, RES extends Table<R, C, V>> extends AbstractG
 
     @Override
     public RES transform(FetchableQuery<?,?> query) {
-        Table<R, C, Group> groups = HashBasedTable.create();
+        // TODO Table<Object, Object, Group> after support for it in https://github.com/querydsl/querydsl/issues/2644
+        Table<R, Object, Group> groups = HashBasedTable.create();
 
         // create groups
         FactoryExpression<Tuple> expr = FactoryExpressionUtils.wrap(Projections.tuple(expressions));
@@ -59,7 +60,7 @@ public class GroupByTable<R, C, V, RES extends Table<R, C, V>> extends AbstractG
                 @SuppressWarnings("unchecked") //This type is mandated by the key type
                 Object[] row = iter.next().toArray();
                 R groupId = (R) row[0];
-                C rowId = (C) row[1];
+                Object rowId = row[1];
                 GroupImpl group = (GroupImpl) groups.get(groupId, rowId);
                 if (group == null) {
                     group = new GroupImpl(groupExpressions, maps);
@@ -77,7 +78,7 @@ public class GroupByTable<R, C, V, RES extends Table<R, C, V>> extends AbstractG
     }
 
     @SuppressWarnings("unchecked")
-    protected RES transform(Table<R, C, Group> groups) {
+    protected RES transform(Table<R, ?, Group> groups) {
         return (RES) groups;
     }
 
