@@ -1,8 +1,11 @@
 package com.querydsl.maven;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.lang.annotation.Annotation;
 
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
@@ -20,7 +23,7 @@ public class GenericExporterMojoTest {
 
         GenericExporterMojo mojo = new GenericExporterMojo();
         mojo.setTargetFolder(new File("target/generated-test-data"));
-        mojo.setPackages(new String[] { "com.querydsl.maven" });
+        mojo.setPackages(new String[] {"com.querydsl.maven"});
         mojo.setProject(mavenProject);
         return mojo;
     }
@@ -40,19 +43,19 @@ public class GenericExporterMojoTest {
 
         File file = Q_ENTITY_SOURCE_FILE;
         String source = FileUtils.fileRead(file);
-        assertTrue(source.contains("@" + GeneratedAnnotationResolver.resolveDefault()));
+        assertThat(source, containsString("@" + GeneratedAnnotationResolver.resolveDefault().getSimpleName()));
     }
 
     @Test
     public void providedGeneratedAnnotation() throws Exception {
-        String annotationClass = com.querydsl.core.annotations.Generated.class.getName();
+        Class<? extends Annotation> annotationClass = com.querydsl.core.annotations.Generated.class;
         GenericExporterMojo mojo = prepareMojo();
-        mojo.setGeneratedAnnotationClass(annotationClass);
+        mojo.setGeneratedAnnotationClass(annotationClass.getName());
         mojo.execute();
 
         File file = Q_ENTITY_SOURCE_FILE;
         String source = FileUtils.fileRead(file);
-        assertTrue(source.contains("@" + annotationClass));
+        assertThat(source, containsString("@" + annotationClass.getSimpleName()));
     }
 
 }
